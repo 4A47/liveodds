@@ -161,7 +161,7 @@ class Race:
 
             for book in self._bookies:
                 price = tag_with_attrib(row, '/td', f'data-bk="{book}"').attrib['data-odig']
-                odds[self._bookies[book]] = price
+                odds[self._bookies[book]] = float(price)
 
             self._odds[horse] = odds
 
