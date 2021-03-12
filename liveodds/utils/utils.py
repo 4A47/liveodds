@@ -2,7 +2,6 @@ import aiohttp
 import asyncio
 from datetime import datetime, timedelta
 from lxml import html
-import requests
 
 
 _racing_bookies = {
@@ -58,13 +57,21 @@ def tag_with_class(element, tag, target):
     return element.find(f'.{tag}[@class="{target}"]')
 
 
-def tag_with_classes(element, tag, targets):
-    target_classes = [f'contains(@class, "{target}")' for target in targets]
-    return element.xpath(f'.{tag}[{" and ".join(target_classes)}]')[0]
-
-
 def tags_with_class(element, tag, target):
     return element.xpath(f'.{tag}[@class="{target}"]')
+
+
+def tag_with_classes(element, tag, targets):
+    return _tags_with_classes(element, tag, targets)[0]
+
+
+def tags_with_classes(element, tag, targets):
+    return _tags_with_classes(element, tag, targets)
+
+
+def _tags_with_classes(element, tag, targets):
+    target_classes = [f'contains(@class, "{target}")' for target in targets]
+    return element.xpath(f'.{tag}[{" and ".join(target_classes)}]')
 
 
 async def documents_async(urls):

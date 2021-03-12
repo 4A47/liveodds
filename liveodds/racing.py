@@ -2,13 +2,14 @@ from .utils.utils import *
 
 from collections import defaultdict
 from json import dumps
+from requests import Session
 
 
 class Racing:
 
     def __init__(self):
         self._meetings = defaultdict(lambda: defaultdict(dict))
-        self.session = requests.Session()
+        self.session = Session()
         self.session.headers.update({'User-Agent': 'Mozilla/5.0'})
         self._get_meetings()
 
@@ -88,7 +89,7 @@ class Meeting:
             try:
                 self._races[key].parse_odds(doc.find('.//tbody'))
             except KeyError:
-                off_time = tag_with_classes(doc, '//a', ['race-time', 'active'])
+                off_time = tag_with_classes(doc, '//a', ('race-time', 'active'))
                 self._races[off_time.text].parse_odds(doc.find('.//tbody'))
 
     def race(self, key):
@@ -126,10 +127,10 @@ class Race:
         self.course = course
         self.date = date
         self.region = region
+        self.session = session
         self.time = time
         self.title = title
         self.url = 'https://www.oddschecker.com' + url
-        self.session = session
 
     def __dir__(self):
         return self.__dict__.keys()
