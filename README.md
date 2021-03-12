@@ -199,7 +199,7 @@ print(meeting, meeting.json())
 
 The JSON viewer shows the structure clearly
 
-![json](https://i.postimg.cc/26WPXgqN/meeting-json.png)
+![json](https://i.postimg.cc/T38JDQM4/odds.png)
 
 
 <br>
