@@ -1,5 +1,6 @@
 from .utils.utils import *
 
+import concurrent.futures
 from collections import defaultdict
 from json import dumps
 from requests import Session
@@ -41,6 +42,24 @@ class Racing:
     def meetings_dict(self, date, region):
         return self._meetings[date][region]
 
+    def meetings_json(self, date, region):
+        meets = self.meetings(date, region)
+
+        def func(meeting):
+            return meeting.course, meeting.odds()
+
+        def execute():
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                result = executor.map(func, meets)
+                return tuple(result)
+
+        json = {}
+
+        for meet in execute():
+            json[meet[0]] = meet[1]
+
+        return dumps(json)
+
     def regions(self, date):
         return [region for region in self._meetings[date]]
 
@@ -53,6 +72,7 @@ class Meeting:
         self.region = region
         self._races = {}
         self.session = session
+        self.urls = []
         self.init_races(race_links)
 
     def __repr__(self):
@@ -66,6 +86,7 @@ class Meeting:
             time = race.text_content()
             title = race.attrib['title']
             url = race.attrib['href']
+            self.urls.append('https://www.oddschecker.com' + url)
             self._races[time] = Race(self.course, self.date, self.region, time, title, url, self.session)
 
     def json(self):
@@ -76,16 +97,21 @@ class Meeting:
         return dumps(json)
 
     def odds(self):
-        odds = {}
+        _odds = {}
         for race in self.races():
-            odds[race.time] = race.odds()
+            _odds[race.time] = race.odds()
 
-        return odds
+        return _odds
 
     def parse_docs(self, docs):
         for doc in docs:
             _url = tag_with_attrib(doc, '//meta', 'property="og:url"')
-            key = _url.attrib['content'].split('/')[5]
+            try:
+                key = _url.attrib['content'].split('/')[5]
+            except AttributeError:
+                print(f'AttributeError: Meeting.parse_docs() -', _url)
+                return
+
             try:
                 self._races[key].parse_odds(doc.find('.//tbody'))
             except KeyError:
@@ -95,23 +121,19 @@ class Meeting:
     def race(self, key):
         doc = document(self._races[key].url, self.session)
         self._races[key].parse_odds(doc.find('.//tbody'))
-
         return self._races[key]
 
-    def races(self):
+    def _parse_races(self):
         urls = [self._races[key].url for key in self._races]
-
         docs = asyncio.run(documents_async(urls))
         self.parse_docs(docs)
 
+    def races(self):
+        self._parse_races()
         return [self._races[race] for race in self._races]
 
     def races_dict(self):
-        urls = [self._races[key].url for key in self._races]
-
-        docs = asyncio.run(documents_async(urls))
-        self.parse_docs(docs)
-
+        self._parse_races()
         return self._races
 
     def times(self):
