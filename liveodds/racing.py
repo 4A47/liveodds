@@ -45,20 +45,12 @@ class Racing:
     def meetings_json(self, date, region):
         meets = self.meetings(date, region)
 
-        def func(meeting):
-            return meeting.course, meeting.odds()
-
         def execute():
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                result = executor.map(func, meets)
+                result = executor.map(lambda m: (m.course, m.odds()), meets)
                 return tuple(result)
 
-        json = {}
-
-        for meet in execute():
-            json[meet[0]] = meet[1]
-
-        return dumps(json)
+        return dumps({meet[0]: meet[1] for meet in execute()})
 
     def regions(self, date):
         return [region for region in self._meetings[date]]
@@ -169,11 +161,14 @@ class Race:
     def json(self):
         return dumps(self._odds)
 
-    def odds(self, horse=None):
+    def odds(self, horse=None, *, bookie=None):
         if horse:
-            return self._odds[horse]
+            return self._odds[horse][bookie] if bookie else self._odds[horse]
         else:
-            return self._odds
+            if bookie:
+                return {k: v[bookie] for (k, v) in self._odds.items()}
+            else:
+                return self._odds
 
     def parse_odds(self, odds_table):
         for row in odds_table.findall('./tr'):
