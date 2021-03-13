@@ -217,7 +217,7 @@ for meeting in racing.meetings(today, region):
 The json method works in exactly the same way as odds() but returns a JSON string as opposed to a dictionary. In the following example we target a specific meeting by providing the date, region and course name.
 
 ```python
-from liveodds.racing import Racing
+from .liveodds.racing import Racing
 
 racing = Racing()
 
@@ -241,33 +241,34 @@ The JSON viewer shows the structure clearly:
 <br>
 
 
-The Race.odds() method returns a dictionary where the key is the name of the horse, and the value is a dictionary of bookies odds. In the following example we access a random race in the UK, and access the odds for a random horse and print its odds with each bookie. The is just to show how to target specific bookies if required.
+The Race.odds(horse=None, *, bookie=None) method returns a dictionary where the key is the name of the horse, and the value is a dictionary of bookies odds. You can optionally pass a specific horse, and a keyword bookie to filter the return. If only the bookie is given it returns odds for all horses with the given bookie. 
+
+In the following example we get a random race and horse in the UK, and watch its odds with a random bookie. The is just to show how to target specific horses and bookies if required.
 
 ```python
 from liveodds.racing import Racing
+from time import sleep, strftime
+
+
+def watch_horse(race, horse, bookie):
+    while True:
+        race.update_odds()
+        odds = race.odds(horse, bookie=bookie)
+        print(f'{race.course} {race.time} - {horse}: {odds} ({bookie}) @ {strftime("%H:%M:%S")}')
+        sleep(3)
+
 
 racing = Racing()
 
 today = racing.dates()[0]
 courses = racing.courses(today, 'UK')
 meeting = racing.meeting(today, 'UK', courses[0])
+race = meeting.race(meeting.times()[0])
 
-
-# Meeting.times() returns an ordered list of times for race at meeting, 0 = first race
-off_time =  meeting.times()[0]
-
-# Meeting.Race(time) returns a race object for a given time
-race = meeting.race(off_time)
-
-# Race.odds() returns a dictionary of odds for the race
-race_odds = race.odds()
-
-# Race.horses() returns an unordered list of horses in the race
 horse = race.horses()[0]
+bookie = race.bookies()[0]
 
-# Race.bookies() returns an unordered list of available bookies
-for bookie in race.bookies():
-    print(f'{horse} - {bookie}: {race_odds[horse][bookie]}')
+watch_horse(race, horse, bookie)
 ```
 <br>
 
