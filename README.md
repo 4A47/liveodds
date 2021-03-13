@@ -11,7 +11,7 @@
 
 ## liveodds
 
-Unofficial (and highly illegal) Python  API for Oddschecker
+Unofficial Python API for Oddschecker
 
 
 Plan to cover a few of the main sports but Racing and Football are only guarantees so far. Golf, Tennis, Greyhounds, Basketball, NFL etc could possibly follow if I don't get bored and if there is sufficient interest. Requests in discussions will be considered, briefly at least, and indeed at most.
@@ -54,7 +54,7 @@ or [download](https://github.com/4A47/liveodds/archive/main.zip) the zip.
 <br>
 
 ## Usage
-Documentation is possible in the future, in the meantime, most of the existing functionality will be shown in example files and here.
+Documentation is possible in the future, in the meantime, most of the existing functionality will be shown here and in example files.
 
 To use the API, copy the **inner** liveodds folder to your project. 
 
@@ -68,7 +68,7 @@ from liveodds.racing import Racing
 <br>
 
 ## Racing
-There are 3 classes, **Racing**, **Meeting** and **Race**. The Racing class provides a few methods to assist in accessing Meeting objects which contain Race objects for each race at the meeting. Odds can be retrieved for the full meeting in the Meeting class or from individual races in the Race class.
+There are 3 classes, **Racing**, **Meeting** and **Race**. The Racing class provides a few methods to assist in accessing Meeting objects which contain Race objects for each race at the meeting.
 
 <details>
 <summary>Racing class details</summary>
@@ -82,6 +82,7 @@ There are 3 classes, **Racing**, **Meeting** and **Race**. The Racing class prov
 | meeting(date: str, region: str, course: str) | Returns a specific meeting object for a given date, region and course                |
 | meetings(date: str, region: str)             | Returns a list of Meeting objects for all meetings on a given date in a given region |
 | meetings_dict(date: str, region: str)        | Returns a dict of Meeting objects for all meetings on a given date in a given region |
+| meetings_json(date: str, region: str)        | Returns a JSON string with odds for all meetings on a given date in a given region   |
 | regions(date: str)                           | Returns a list of string region codes for a given date                               |
 
 
@@ -91,8 +92,9 @@ There are 3 classes, **Racing**, **Meeting** and **Race**. The Racing class prov
 
 ### Meeting
 
-**Meeting objects** contain information about a meeting and Race objects for each race at the meeting. They can be used to access the odds for every race at the meeting. They are stored in a nested dictionary in the Racing class and can be accessed using the convenience methods provided.
+**Meeting objects** contain information about a meeting, methods to get all odds for a meeting in dictionary or JSON format, and Race objects for each race at the meeting. Meeting objects are stored in a nested dictionary in the Racing class and can be accessed using the convenience methods provided, or directly from the underlying Racing._meetings dictionary for the criminally insane.
 
+Meeting objects can be accessed using the following methods in the Racing class:
 
 #### Racing.meeting(date: str, region: str, course: str)
 _Returns a specific meeting object_
@@ -102,6 +104,7 @@ _Returns a specific meeting object_
 _Returns a list of meeting objects for a given date and region._
 
 <br>
+
 <details>
 <summary>Meeting Class details</summary>
 
@@ -124,11 +127,12 @@ _Returns a list of meeting objects for a given date and region._
 | course: str      | Name of the course                        |
 
 </details>
+
 <br>
 
 ### Race
 
-**Race objects** contain information and odds for a race, they are retrieved using the following methods in the Meeting class. 
+**Race objects** contain information and odds for a race, they are retrieved using the following methods in the Meeting class:
 
 #### Meeting.race(time: str)
 _Returns a specific race object given a start time ie '14:30'_
@@ -165,7 +169,32 @@ Returns a list of race objects for all races in the meeting.
 
 ### Examples
 
-Get meeting objects for today's racing in the UK and get a dictionary of odds for each meeting
+You can target meetings and races specifically as will be shown, or you can simply get a JSON string for every meeting for a date and region:
+
+```python
+from liveodds.racing import Racing
+
+racing = Racing()
+
+# Racing.dates() returns an ordered list of dates, 0 = today
+today = racing.dates()[0]
+
+# Racing.meetings_json(date, region)
+json = racing.meetings_json(today, 'UK')
+
+print(json)
+```
+
+the JSON viewer shows an example output
+
+![meetingsJSON](https://i.postimg.cc/HWfNg1GZ/meetings.png)
+
+<br>
+
+
+If you only care about some races or meetings, you can get them more efficiently by using the Meeting and Race objects. The methods to access meeting objects generally take as parameters a date string, and a region code, which is an all caps 2 or 3 letter code, i.e 'UK' or 'IRE'. 
+
+In the following example we get Meeting objects for a random region (highly likely to be UK in index 0 but I cannot guarantee how the site will be layed out) and access the odds dictionary for each meeting:
 
 ```python
 from liveodds.racing import Racing
@@ -174,14 +203,18 @@ racing = Racing()
 
 today = racing.dates()[0]
 
-for meeting in racing.meetings(today, 'UK'):
+# Racing.regions() returns an unordered list of regions for a given date
+region = racing.regions(today)[0]
+
+# Racing.meetings(date, region) returns a list of Meeting objects
+for meeting in racing.meetings(today, region):
     odds = meeting.odds()
     print(meeting.course, odds)
 ```
 
 <br>
 
-The json method works in exactly the same way as odds but returns a JSON string as opposed to a dictionary.
+The json method works in exactly the same way as odds() but returns a JSON string as opposed to a dictionary. In the following example we target a specific meeting by providing the date, region and course name.
 
 ```python
 from liveodds.racing import Racing
@@ -190,37 +223,25 @@ racing = Racing()
 
 today = racing.dates()[0]
 region = racing.regions(today)[0]
+
+# Racing.courses(date, region) returns an unordered list of available courses
 course = racing.courses(today, region)[0]
 
+# Racing.meeting(date, region, course) returns a meeting object
 meeting = racing.meeting(today, region, course)
 
-print(meeting, meeting.json())
+print(meeting.json())
 ```
 
-The JSON viewer shows the structure clearly
+The JSON viewer shows the structure clearly:
 
 ![json](https://i.postimg.cc/T38JDQM4/odds.png)
 
 
 <br>
 
-Get a list of race objects from a meeting and print some information about them
 
-```python
-from liveodds.racing import Racing
-
-racing = Racing()
-
-today = racing.dates()[0]
-course = racing.courses(today, 'UK')[0]
-meeting = racing.meeting(today, 'UK', course)
-
-for race in meeting.races():
-    print(race.course, race.time, race.odds())
-```
-<br>
-
-The Race.odds() method returns a dictionary where the key is the name of the horse, and the value is a dictionary of bookies odds
+The Race.odds() method returns a dictionary where the key is the name of the horse, and the value is a dictionary of bookies odds. In the following example we access a random race in the UK, and access the odds for a random horse and print its odds with each bookie. The is just to show how to target specific bookies if required.
 
 ```python
 from liveodds.racing import Racing
@@ -230,21 +251,29 @@ racing = Racing()
 today = racing.dates()[0]
 courses = racing.courses(today, 'UK')
 meeting = racing.meeting(today, 'UK', courses[0])
-race = meeting.race(meeting.times()[0])
 
+
+# Meeting.times() returns an ordered list of times for race at meeting, 0 = first race
+off_time =  meeting.times()[0]
+
+# Meeting.Race(time) returns a race object for a given time
+race = meeting.race(off_time)
+
+# Race.odds() returns a dictionary of odds for the race
 race_odds = race.odds()
 
+# Race.horses() returns an unordered list of horses in the race
 horse = race.horses()[0]
 
+# Race.bookies() returns an unordered list of available bookies
 for bookie in race.bookies():
     print(f'{horse} - {bookie}: {race_odds[horse][bookie]}')
-
 ```
 <br>
 
 You can return a JSON string instead of a dictionary with the Race.json() method. A view of the json should make the structure clear.
 
-![json](https://i.postimg.cc/CMR4LSMw/json.png)
+![json](https://i.postimg.cc/kgxLHfx0/race.png)
 
 <br>
 
