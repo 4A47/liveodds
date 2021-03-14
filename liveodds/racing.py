@@ -27,6 +27,9 @@ class Racing:
                 race_links = races.findall('.//a')
                 self._meetings[date][region][course] = Meeting(date, course, region, race_links, self.session)
 
+    def bookies(self):
+        return racing_bookies()
+        
     def courses(self, date, region):
         return [course for course in self._meetings[date][region]]
 
@@ -81,7 +84,7 @@ class Meeting:
             num_of_links = len(times)
 
             for i, time in enumerate(times):
-                if(i + 1 < num_of_links):
+                if i + 1 < num_of_links:
                     if (times[i + 1] - time).seconds / 3600  > 6:
                         split = i + 1
                         break
@@ -187,13 +190,16 @@ class Race:
 
     def parse_odds(self, odds_table):
         for row in odds_table.findall('./tr'):
+            if 'N/R' in tag_with_classes(row, '//a', ('popup', 'selTxt')).text:
+                continue
             horse = row.attrib['data-bname']
             # num = tag_with_class(row, '/td', 'cardnum').text
             odds = {}
 
             for book in self._bookies:
-                price = tag_with_attrib(row, '/td', f'data-bk="{book}"').attrib['data-odig']
-                odds[self._bookies[book]] = float(price)
+                price = float(tag_with_attrib(row, '/td', f'data-bk="{book}"').attrib['data-odig'])
+
+                odds[self._bookies[book]] = price if price > 0 else '-'
 
             self._odds[horse] = odds
 
