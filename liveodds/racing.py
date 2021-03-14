@@ -74,6 +74,21 @@ class Meeting:
         return self.__dict__.keys()
 
     def init_races(self, race_links):
+        split = 0
+        
+        if len(race_links) > 12:
+            times = [datetime.strptime(self.date + link.text_content(), '%Y-%m-%d%H:%M') for link in race_links]
+            num_of_links = len(times)
+
+            for i, time in enumerate(times):
+                if(i + 1 < num_of_links):
+                    if (times[i + 1] - time).seconds / 3600  > 6:
+                        split = i + 1
+                        break
+
+        if split > 0:
+            race_links = race_links[split:]    
+
         for race in race_links:
             time = race.text_content()
             title = race.attrib['title']
@@ -129,7 +144,7 @@ class Meeting:
         return self._races
 
     def times(self):
-        return list(sorted(self._races.keys()))
+        return list(self._races.keys())
 
 
 class Race:
