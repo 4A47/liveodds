@@ -18,7 +18,7 @@ class Racing:
         doc = document('https://www.oddschecker.com/horse-racing', self.session)
 
         for section in tags_with_attrib(doc, '//div', 'data-day'):
-            date = get_date(section.attrib['data-day'])
+            date = get_date(section.attrib['data-day'].lower())
 
             for meeting in tags_with_class(section, '//div', 'race-details'):
                 course = meeting.find('.//a').text

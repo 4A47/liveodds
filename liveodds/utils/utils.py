@@ -27,22 +27,23 @@ _racing_bookies = {
 
 def get_date(day):
     today = datetime.today()
+    
+    if day == 'today':
+        return today.strftime('%Y-%m-%d')
+
     date_list = [today + timedelta(days=x) for x in range(6)]
-    days = {'today': today.strftime('%Y-%m-%d')}
-
-    for date in date_list[1:]:
-        days[date.strftime('%A')] = date.strftime('%Y-%m-%d')
-
+    days = {d.strftime('%A').lower(): d.strftime('%Y-%m-%d') for d in date_list}
+    
     return days[day]
-
-
-def racing_bookies():
-    return _racing_bookies
 
 
 def document(url, session):
     r = session.get(url)
     return html.fromstring(r.content)
+
+
+def racing_bookies():
+    return _racing_bookies
 
 
 def tag_with_attrib(element, tag, target):
