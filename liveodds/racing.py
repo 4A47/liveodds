@@ -84,10 +84,9 @@ class Meeting:
             num_of_links = len(times)
 
             for i, time in enumerate(times):
-                if i + 1 < num_of_links:
-                    if (times[i + 1] - time).seconds / 3600  > 6:
-                        split = i + 1
-                        break
+                if i + 1 < num_of_links and (times[i + 1] - time).seconds / 3600 > 6:
+                    split = i + 1
+                    break
 
         if split > 0:
             race_links = race_links[split:]    
@@ -116,10 +115,11 @@ class Meeting:
     def parse_docs(self, docs):
         for doc in docs:
             _url = tag_with_attrib(doc, '//meta', 'property="og:url"')
+
             try:
                 key = _url.attrib['content'].split('/')[5]
-            except AttributeError:
-                print(f'AttributeError: Meeting.parse_docs() -', _url)
+            except (AttributeError, IndexError) as e:
+                print(f'Error: {e}: Meeting.parse_docs() -', _url)
                 return
 
             try:
@@ -190,7 +190,7 @@ class Race:
 
     def parse_odds(self, odds_table):
         for row in odds_table.findall('./tr'):
-            if 'N/R' in tag_with_classes(row, '//a', ('popup', 'selTxt')).text:
+            if 'N/R' in tag_with_classes(row, '//a', ('popup', 'selTxt')).text_content():
                 continue
             horse = row.attrib['data-bname']
             # num = tag_with_class(row, '/td', 'cardnum').text
@@ -198,7 +198,7 @@ class Race:
 
             for book in self._bookies:
                 price = float(tag_with_attrib(row, '/td', f'data-bk="{book}"').attrib['data-odig'])
-
+                price = int(price) if price.is_integer() else price
                 odds[self._bookies[book]] = price if price > 0 else '-'
 
             self._odds[horse] = odds
