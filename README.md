@@ -9,12 +9,7 @@
   <img src="https://i.postimg.cc/0Q4twkVp/comments-0-yellowgreen.png">
 </p>
 
-## liveodds
-
-Unofficial Python API for Oddschecker
-
-
-Plan to cover a few of the main sports but Racing and Football are only guarantees so far. Golf, Tennis, Greyhounds, Basketball, NFL etc could possibly follow if I don't get bored and if there is sufficient interest. Requests in discussions will be considered, briefly at least, and indeed at most.
+Python API for Horse Racing odds
 
 <br>
 
@@ -22,15 +17,10 @@ Plan to cover a few of the main sports but Racing and Football are only guarante
 - [Requirements](#requirements)
 - [Install](#install)
 - [Usage](#usage)
-- [API](#racing)
-    - [Racing](#racing)
-        - [Meeting](#meeting)
-        - [Race](#race)
-        - [Examples](#examples-1)
-    - [Football](#racing)
-        - [Competition](#competition)
-        - [Match](#match)
-        - [Examples](#examples-2)
+- [API](#api)
+    - [Meeting](#meeting)
+    - [Race](#race)
+    - [Examples](#examples)
 - [Disclaimer](#disclaimer)
 
 <br>
@@ -54,20 +44,14 @@ or [download](https://github.com/4A47/liveodds/archive/main.zip) the zip.
 <br>
 
 ## Usage
-Documentation is possible in the future, in the meantime, most of the existing functionality will be shown here and in example files.
 
-To use the API, copy the **inner** liveodds folder to your project. 
-
-Only football and racing are confirmed thus far but this will be the style of import for any sport that gets covered.
-
-```python
-from liveodds.football import Football
-from liveodds.racing import Racing
-```
+Copy the **inner** liveodds folder to your project.
 
 <br>
 
-## Racing
+
+## API
+
 There are 3 classes, **Racing**, **Meeting** and **Race**. The Racing class provides a few methods to assist in accessing Meeting objects which contain Race objects for each race at the meeting.
 
 <details>
@@ -217,7 +201,7 @@ for meeting in racing.meetings(today, region):
 The json method works in exactly the same way as odds() but returns a JSON string as opposed to a dictionary. In the following example we target a specific meeting by providing the date, region and course name.
 
 ```python
-from .liveodds.racing import Racing
+from liveodds.racing import Racing
 
 racing = Racing()
 
@@ -278,21 +262,5 @@ You can return a JSON string instead of a dictionary with the Race.json() method
 
 <br>
 
-## Football
-
-
-### Competition
-
-
-### Match
-
-
-### Examples
-
-
-<br>
-
-
 #### Disclaimer
 I hereby renounce all liability when the MI6 cybercrime net inevitably closes in on users of this API. If you do, in a moment of misguided recklessness, decide to use this API, you *will* go to jail, no ifs, buts or maybes, the cost of doing business here is hard time. So before you clone, ask yourself just how much you really want access to the latest odds in a python script, and is it worth throwing your life away for it? Would you torrent a car?
-
