@@ -45,7 +45,11 @@ or [download](https://github.com/4A47/liveodds/archive/main.zip) the zip.
 
 ## Usage
 
-Copy the **inner** liveodds folder to your project.
+Copy the **inner** liveodds folder to your project and import with the following line:
+
+```python
+from liveodds.racing import Racing
+```
 
 <br>
 
@@ -78,7 +82,7 @@ There are 3 classes, **Racing**, **Meeting** and **Race**. The Racing class prov
 
 **Meeting objects** contain information about a meeting, methods to get all odds for a meeting in dictionary or JSON format, and Race objects for each race at the meeting. Meeting objects are stored in a nested dictionary in the Racing class and can be accessed using the convenience methods provided, or directly from the underlying Racing._meetings dictionary for the criminally insane.
 
-Meeting objects can be accessed using the following methods in the Racing class:
+Meeting objects can be retrieved using the following methods in the Racing class:
 
 #### Racing.meeting(date: str, region: str, course: str)
 _Returns a specific meeting object_
@@ -160,10 +164,8 @@ from liveodds.racing import Racing
 
 racing = Racing()
 
-# Racing.dates() returns an ordered list of dates, 0 = today
 today = racing.dates()[0]
 
-# Racing.meetings_json(date, region)
 json = racing.meetings_json(today, 'UK')
 
 print(json)
@@ -176,9 +178,9 @@ the JSON viewer shows an example output
 <br>
 
 
-If you only care about some races or meetings, you can get them more efficiently by using the Meeting and Race objects. The methods to access meeting objects generally take as parameters a date string, and a region code, which is an all caps 2 or 3 letter code, i.e 'UK' or 'IRE'. 
+If you only care about some races or meetings, you can get them more efficiently using the Meeting and Race objects. Methods to retrieve meeting objects generally take as parameters a date, and a region code, which is an all caps 2 or 3 letter code, i.e 'UK' or 'IRE'. 
 
-In the following example we get Meeting objects for a random region (highly likely to be UK in index 0 but I cannot guarantee how the site will be layed out) and access the odds dictionary for each meeting:
+In the following example we get Meeting objects for a random region and access the odds dictionary for each meeting:
 
 ```python
 from liveodds.racing import Racing
@@ -187,10 +189,8 @@ racing = Racing()
 
 today = racing.dates()[0]
 
-# Racing.regions() returns an unordered list of regions for a given date
 region = racing.regions(today)[0]
 
-# Racing.meetings(date, region) returns a list of Meeting objects
 for meeting in racing.meetings(today, region):
     odds = meeting.odds()
     print(meeting.course, odds)
@@ -198,7 +198,7 @@ for meeting in racing.meetings(today, region):
 
 <br>
 
-The json method works in exactly the same way as odds() but returns a JSON string as opposed to a dictionary. In the following example we target a specific meeting by providing the date, region and course name.
+The json method works exactly the same as odds() but returns a JSON string as opposed to a dictionary. In the following example we target a specific meeting by providing the date, region and course name.
 
 ```python
 from liveodds.racing import Racing
@@ -207,11 +207,8 @@ racing = Racing()
 
 today = racing.dates()[0]
 region = racing.regions(today)[0]
-
-# Racing.courses(date, region) returns an unordered list of available courses
 course = racing.courses(today, region)[0]
 
-# Racing.meeting(date, region, course) returns a meeting object
 meeting = racing.meeting(today, region, course)
 
 print(meeting.json())
@@ -225,7 +222,7 @@ The JSON viewer shows the structure clearly:
 <br>
 
 
-The Race.odds(horse=None, *, bookie=None) method returns a dictionary where the key is the name of the horse, and the value is a dictionary of bookies odds. You can optionally pass a specific horse, and a keyword bookie to filter the return. If only the bookie is given it returns odds for all horses with the given bookie. 
+The Race.odds() method returns a dictionary where the key is the name of the horse, and the value is a dictionary of bookies odds. You can optionally pass a specific horse, and a keyword bookie to filter the return. If only the bookie is given it returns odds for all horses with the given bookie. 
 
 In the following example we get a random race and horse in the UK, and watch its odds with a random bookie. The is just to show how to target specific horses and bookies if required.
 
