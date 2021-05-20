@@ -23,6 +23,7 @@ class Racing:
             for meeting in tags_with_class(section, '//div', 'race-details'):
                 course = meeting.find('.//a').text
                 region = meeting.find('.//span/span').text
+                if region == 'Northern Ireland': region = 'IRE'
                 races = tag_with_class(meeting, '//div', 'all-todays-races')
                 race_links = races.findall('.//a')
                 self._meetings[date][region][course] = Meeting(date, course, region, race_links, self.session)

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from lxml import html
 
 
-_racing_bookies = {
+_bookies = {
     "B3": "bet365",
     "SK": "Sky Bet",
     "PP": "Paddy Power",
@@ -43,7 +43,7 @@ def document(url, session):
 
 
 def racing_bookies():
-    return _racing_bookies
+    return _bookies
 
 
 def tag_with_attrib(element, tag, target):
